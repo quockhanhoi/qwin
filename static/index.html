@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>BotHosting Claimer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+  --bg:#070a0f;
+  --panel:#0d1117;
+  --border:#1e2a3a;
+  --accent:#00e5ff;
+  --accent2:#7b2fff;
+  --green:#00ff88;
+  --red:#ff4466;
+  --yellow:#ffcc00;
+  --text:#e8f0fe;
+  --muted:#4a5568;
+}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Syne',sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* bg grid */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:
+    linear-gradient(var(--border) 1px,transparent 1px),
+    linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:40px 40px;
+  opacity:.25;
+  pointer-events:none;
+}
+
+/* glow orbs */
+body::after{
+  content:'';
+  position:fixed;
+  width:600px;height:600px;
+  background:radial-gradient(circle,rgba(0,229,255,.06) 0%,transparent 70%);
+  top:-100px;right:-100px;
+  pointer-events:none;
+}
+
+.wrap{
+  max-width:780px;
+  margin:0 auto;
+  padding:40px 20px;
+  position:relative;
+  z-index:1;
+}
+
+/* header */
+header{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  margin-bottom:48px;
+}
+
+.logo{
+  width:44px;height:44px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border-radius:12px;
+  display:grid;place-items:center;
+  font-size:20px;
+  box-shadow:0 0 20px rgba(0,229,255,.3);
+}
+
+header h1{
+  font-size:22px;
+  font-weight:800;
+  letter-spacing:-0.5px;
+}
+
+header h1 span{
+  color:var(--accent);
+}
+
+.badge{
+  margin-left:auto;
+  background:rgba(0,229,255,.08);
+  border:1px solid rgba(0,229,255,.2);
+  color:var(--accent);
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  padding:4px 10px;
+  border-radius:20px;
+  letter-spacing:1px;
+}
+
+/* card */
+.card{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:24px;
+  margin-bottom:16px;
+  position:relative;
+  overflow:hidden;
+  transition:border-color .2s;
+}
+
+.card:hover{ border-color:#2d3f55; }
+
+.card::before{
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  opacity:.4;
+}
+
+.card-title{
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:2px;
+  color:var(--muted);
+  text-transform:uppercase;
+  margin-bottom:16px;
+}
+
+/* input */
+.input-row{
+  display:flex;gap:10px;
+  flex-wrap:wrap;
+}
+
+input[type=text]{
+  flex:1;
+  background:#0a0f18;
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:12px 16px;
+  color:var(--text);
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;
+  outline:none;
+  transition:border-color .2s,box-shadow .2s;
+  min-width:0;
+}
+
+input[type=text]:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(0,229,255,.08);
+}
+
+input[type=text]::placeholder{ color:var(--muted); }
+
+/* buttons */
+.btn{
+  padding:12px 20px;
+  border-radius:10px;
+  border:none;
+  cursor:pointer;
+  font-family:'Syne',sans-serif;
+  font-weight:700;
+  font-size:13px;
+  letter-spacing:.5px;
+  transition:all .15s;
+  white-space:nowrap;
+}
+
+.btn-primary{
+  background:linear-gradient(135deg,var(--accent),#00b8d9);
+  color:#000;
+  box-shadow:0 0 20px rgba(0,229,255,.2);
+}
+
+.btn-primary:hover:not(:disabled){
+  box-shadow:0 0 30px rgba(0,229,255,.4);
+  transform:translateY(-1px);
+}
+
+.btn-claim{
+  width:100%;
+  padding:16px;
+  font-size:15px;
+  background:linear-gradient(135deg,var(--accent2),#5b21b6);
+  color:#fff;
+  box-shadow:0 0 24px rgba(123,47,255,.25);
+  margin-top:8px;
+}
+
+.btn-claim:hover:not(:disabled){
+  box-shadow:0 0 36px rgba(123,47,255,.45);
+  transform:translateY(-1px);
+}
+
+.btn:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+  transform:none !important;
+}
+
+/* profile */
+.profile{
+  display:none;
+  gap:20px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.profile.show{ display:flex; }
+
+.avatar{
+  width:52px;height:52px;
+  border-radius:14px;
+  background:linear-gradient(135deg,var(--accent2),var(--accent));
+  display:grid;place-items:center;
+  font-size:22px;
+  font-weight:800;
+  color:#fff;
+  flex-shrink:0;
+}
+
+.profile-info h2{
+  font-size:18px;
+  font-weight:800;
+  margin-bottom:4px;
+}
+
+.stats{
+  display:flex;gap:8px;
+  flex-wrap:wrap;
+  margin-top:4px;
+}
+
+.stat{
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:4px 10px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px;
+  color:var(--muted);
+}
+
+.stat b{ color:var(--text); }
+
+/* status pill */
+.pill{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:5px 12px;
+  border-radius:20px;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.3px;
+}
+
+.pill-green{ background:rgba(0,255,136,.1); color:var(--green); border:1px solid rgba(0,255,136,.2); }
+.pill-red  { background:rgba(255,68,102,.1); color:var(--red);   border:1px solid rgba(255,68,102,.2); }
+.pill-yellow{background:rgba(255,204,0,.1);  color:var(--yellow);border:1px solid rgba(255,204,0,.2); }
+
+.dot{
+  width:6px;height:6px;
+  border-radius:50%;
+  background:currentColor;
+  animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse{
+  0%,100%{opacity:1}
+  50%{opacity:.3}
+}
+
+/* log */
+.log{
+  background:#050810;
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:14px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px;
+  line-height:1.7;
+  max-height:220px;
+  overflow-y:auto;
+  display:none;
+}
+
+.log.show{ display:block; }
+.log::-webkit-scrollbar{width:4px}
+.log::-webkit-scrollbar-track{background:transparent}
+.log::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+.log-line{ margin:1px 0; }
+.log-ok   { color:var(--green); }
+.log-err  { color:var(--red); }
+.log-info { color:var(--accent); }
+.log-warn { color:var(--yellow); }
+
+/* tokens list */
+.token-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-top:12px;
+}
+
+.token-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  background:#050810;
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:10px 14px;
+  animation:fadeIn .2s ease;
+}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+
+.token-item .tk-name{
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px;
+  color:var(--muted);
+  flex:1;
+}
+
+.token-item .tk-status{ margin-left:auto; }
+
+.btn-remove{
+  background:rgba(255,68,102,.1);
+  border:1px solid rgba(255,68,102,.2);
+  color:var(--red);
+  border-radius:6px;
+  padding:3px 8px;
+  font-size:11px;
+  cursor:pointer;
+  font-family:'Syne',sans-serif;
+  font-weight:700;
+  transition:all .15s;
+}
+.btn-remove:hover{ background:rgba(255,68,102,.2); }
+
+/* spinner */
+.spin{
+  display:inline-block;
+  width:14px;height:14px;
+  border:2px solid rgba(0,229,255,.2);
+  border-top-color:var(--accent);
+  border-radius:50%;
+  animation:spin .6s linear infinite;
+  vertical-align:middle;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* auto claim row */
+.auto-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.toggle{
+  position:relative;
+  width:44px;height:24px;
+  cursor:pointer;
+}
+.toggle input{ display:none; }
+.toggle-track{
+  position:absolute;inset:0;
+  background:var(--border);
+  border-radius:12px;
+  transition:background .2s;
+}
+.toggle input:checked ~ .toggle-track{ background:var(--accent2); }
+.toggle-thumb{
+  position:absolute;
+  top:3px;left:3px;
+  width:18px;height:18px;
+  background:#fff;
+  border-radius:50%;
+  transition:transform .2s;
+  box-shadow:0 1px 4px rgba(0,0,0,.4);
+}
+.toggle input:checked ~ .toggle-thumb{ transform:translateX(20px); }
+
+.section-label{
+  font-size:13px;
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <header>
+    <div class="logo">⚡</div>
+    <h1>BotHosting <span>Claimer</span></h1>
+    <div class="badge">v2.0</div>
+  </header>
+
+  <!-- Token input -->
+  <div class="card">
+    <div class="card-title">🔑 Thêm Token</div>
+    <div class="input-row">
+      <input type="text" id="tokenInput" placeholder="Dán token bot-hosting vào đây..."/>
+      <button class="btn btn-primary" onclick="addToken()">Thêm</button>
+    </div>
+    <div class="token-list" id="tokenList"></div>
+  </div>
+
+  <!-- Account info -->
+  <div class="card" id="infoCard" style="display:none">
+    <div class="card-title">👤 Tài Khoản</div>
+    <div class="profile" id="profileBox">
+      <div class="avatar" id="avatarEl">?</div>
+      <div class="profile-info">
+        <h2 id="usernameEl">—</h2>
+        <div class="stats">
+          <div class="stat">💰 <b id="coinsEl">0</b> xu</div>
+          <div class="stat">🖥 <b id="serversEl">0</b> servers</div>
+        </div>
+      </div>
+      <div id="claimStatusEl"></div>
+    </div>
+  </div>
+
+  <!-- Claim -->
+  <div class="card">
+    <div class="card-title">🎯 Claim Coins</div>
+
+    <div class="auto-row" style="margin-bottom:16px">
+      <div class="section-label">
+        <span>Auto Claim tất cả token</span>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="autoToggle" onchange="toggleAuto()"/>
+        <div class="toggle-track"></div>
+        <div class="toggle-thumb"></div>
+      </label>
+    </div>
+
+    <button class="btn btn-claim" id="claimBtn" onclick="claimAll()">
+      ⚡ Claim Ngay
+    </button>
+
+    <div class="log show" id="logBox" style="margin-top:14px"></div>
+  </div>
+
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────
+let tokens     = JSON.parse(localStorage.getItem("bh_tokens") || "[]");
+let autoTimer  = null;
+let isRunning  = false;
+
+// ── Token management ───────────────────────────────────────────────
+function saveTokens(){ localStorage.setItem("bh_tokens", JSON.stringify(tokens)); }
+
+function addToken(){
+  const inp = document.getElementById("tokenInput");
+  const val = inp.value.trim();
+  if(!val) return;
+  if(tokens.includes(val)){ log("Token đã tồn tại","warn"); return; }
+  tokens.push(val);
+  saveTokens();
+  inp.value = "";
+  renderTokenList();
+  fetchInfo(val);
+}
+
+function removeToken(t){
+  tokens = tokens.filter(x => x !== t);
+  saveTokens();
+  renderTokenList();
+  log(`Đã xoá token ${mask(t)}`,"warn");
+}
+
+function mask(t){ return t ? t.slice(0,6)+"***"+t.slice(-4) : "?"; }
+
+function renderTokenList(){
+  const el = document.getElementById("tokenList");
+  if(!tokens.length){ el.innerHTML = ""; return; }
+  el.innerHTML = tokens.map(t => `
+    <div class="token-item" id="ti_${btoa(t).replace(/=/g,'')}">
+      <div class="tk-name">${mask(t)}</div>
+      <div class="tk-status" id="ts_${btoa(t).replace(/=/g,'')}">
+        <span class="pill pill-yellow"><span class="dot"></span>Loading</span>
+      </div>
+      <button class="btn-remove" onclick="removeToken('${t}')">✕</button>
+    </div>
+  `).join("");
+  tokens.forEach(fetchInfo);
+}
+
+// ── API calls ──────────────────────────────────────────────────────
+async function fetchInfo(token){
+  try{
+    const r = await fetch(`/api/info?token=${encodeURIComponent(token)}`);
+    const d = await r.json();
+    updateTokenStatus(token, d);
+    if(tokens.indexOf(token) === 0) updateProfile(d);
+  } catch(e){ log("Lỗi fetch info: "+e,"err"); }
+}
+
+function updateTokenStatus(token, d){
+  const id = "ts_"+btoa(token).replace(/=/g,"");
+  const el = document.getElementById(id);
+  if(!el) return;
+  if(!d.ok){
+    el.innerHTML = `<span class="pill pill-red">❌ Lỗi</span>`;
+    return;
+  }
+  if(d.claimable){
+    el.innerHTML = `<span class="pill pill-green"><span class="dot"></span>Sẵn sàng</span>`;
+  } else {
+    const h = Math.floor(d.cooldown/3600), m = Math.floor((d.cooldown%3600)/60);
+    el.innerHTML = `<span class="pill pill-yellow">⏳ ${h}h${m}m</span>`;
+  }
+}
+
+function updateProfile(d){
+  if(!d.ok) return;
+  document.getElementById("infoCard").style.display = "";
+  document.getElementById("profileBox").classList.add("show");
+  document.getElementById("usernameEl").textContent = d.username || "?";
+  document.getElementById("coinsEl").textContent    = d.coins ?? "?";
+  document.getElementById("serversEl").textContent  = d.servers ?? "?";
+  document.getElementById("avatarEl").textContent   = (d.username||"?")[0].toUpperCase();
+
+  const cs = document.getElementById("claimStatusEl");
+  cs.innerHTML = d.claimable
+    ? `<span class="pill pill-green"><span class="dot"></span>Sẵn sàng claim</span>`
+    : `<span class="pill pill-yellow">⏳ Cooldown ${Math.floor(d.cooldown/3600)}h</span>`;
+}
+
+// ── Claim ──────────────────────────────────────────────────────────
+async function claimAll(){
+  if(isRunning) return;
+  if(!tokens.length){ log("Chưa có token nào!","warn"); return; }
+
+  isRunning = true;
+  const btn = document.getElementById("claimBtn");
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spin"></span> Đang claim...`;
+
+  for(const token of tokens){
+    log(`→ Claim ${mask(token)}...`, "info");
+    try{
+      const r = await fetch("/api/claim", {
+        method:"POST",
+        headers:{"content-type":"application/json"},
+        body: JSON.stringify({token})
+      });
+      const d = await r.json();
+      if(d.ok){
+        log(`✅ ${mask(token)} — ${d.msg} | ${d.coins}xu | captcha ${d.captchaMs}ms`, "ok");
+      } else {
+        const cd = d.cooldown ? ` (còn ${Math.floor(d.cooldown/3600)}h${Math.floor((d.cooldown%3600)/60)}m)` : "";
+        log(`⚠ ${mask(token)} — ${d.msg}${cd}`, "warn");
+      }
+      fetchInfo(token);
+    } catch(e){
+      log(`❌ ${mask(token)} — ${e}`, "err");
+    }
+    await sleep(1200);
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = "⚡ Claim Ngay";
+  isRunning = false;
+}
+
+// ── Auto claim ─────────────────────────────────────────────────────
+function toggleAuto(){
+  const on = document.getElementById("autoToggle").checked;
+  if(on){
+    log("🔁 Auto claim bật — tự claim mỗi 7 ngày", "info");
+    runAuto();
+  } else {
+    clearTimeout(autoTimer);
+    log("⏹ Auto claim tắt", "warn");
+  }
+}
+
+async function runAuto(){
+  await claimAll();
+  autoTimer = setTimeout(runAuto, 7 * 24 * 3600 * 1000);
+  log(`⏰ Lần tiếp theo sau 7 ngày`, "info");
+}
+
+// ── Log ────────────────────────────────────────────────────────────
+function log(msg, type="info"){
+  const box = document.getElementById("logBox");
+  const d   = new Date();
+  const ts  = `${d.getHours().toString().padStart(2,"0")}:${d.getMinutes().toString().padStart(2,"0")}:${d.getSeconds().toString().padStart(2,"0")}`;
+  const cls = {ok:"log-ok",err:"log-err",info:"log-info",warn:"log-warn"}[type]||"";
+  const line= document.createElement("div");
+  line.className = `log-line ${cls}`;
+  line.textContent = `[${ts}] ${msg}`;
+  box.appendChild(line);
+  box.scrollTop = box.scrollHeight;
+  // max 100 dòng
+  while(box.children.length > 100) box.removeChild(box.firstChild);
+}
+
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+// ── Init ───────────────────────────────────────────────────────────
+renderTokenList();
+log("BotHosting Claimer ready","info");
+log("Thêm token rồi bấm Claim Ngay ⚡","info");
+</script>
+</body>
+</html>
