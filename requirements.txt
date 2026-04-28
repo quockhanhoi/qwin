@@ -1,6 +1,0 @@
-flask
-flask-cors
-httpx
-requests
-undetected-chromedriver
-setuptools
